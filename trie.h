@@ -41,10 +41,14 @@ class Trie {
 		struct Node {
 			T* value;
 			vector<Node*> chars;
+			Node* parent;
+			int countNotNull;
 
 			Node(){
 				this->value = NULL;
+				this->parent = NULL;
 				this->chars = vector<Node*>(256,NULL);
+				this->countNotNull = 0;
 			}
 
 			~Node(){
@@ -86,7 +90,10 @@ void Trie<T>::define(const string key, const T& value){
 
 		if(iter->chars[characterPos] == NULL){
 			Node* newNode = new Node();
+			newNode->parent = iter;
+
 			iter->chars[characterPos] = newNode;
+			iter->countNotNull++;
 		}
 
 		iter = iter->chars[characterPos];
@@ -108,11 +115,10 @@ bool Trie<T>::defined(const string key) const{
 	for (int i = 0; i < key.length(); ++i){
 		int characterPos = (int)key[i];
 
-		if(iter->chars[characterPos] != NULL){
+		if(iter->chars[characterPos] != NULL)
 			iter = iter->chars[characterPos];
-		}else{
+		else
 			return false;
-		}
 	}
 
 	return iter->value != NULL;
