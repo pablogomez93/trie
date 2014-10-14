@@ -8,7 +8,7 @@
 using namespace std;
 
 
-template<typename T>
+template<class T>
 class Trie {
 
 	public:
@@ -19,6 +19,7 @@ class Trie {
 		void define(const string, const T&);
 		bool defined(const string) const;
 		T& value(const string) const;
+		void erase(const string);
 		int keysCount() const;
 		const Iterator keys() const;
 
@@ -52,12 +53,17 @@ class Trie {
 			}
 
 			~Node(){
-				if(value != NULL)
+				if(value != NULL){
 					delete value;
+					value = NULL;
+				}
 
 				for(int i = 256; i>0; i--)
-					if(chars[i-1] != NULL)
+					if(chars[i-1] != NULL){
 						delete chars[i-1];
+						chars[i-1] = NULL;
+					}
+			
 			}
 
 		};
@@ -135,6 +141,44 @@ T& Trie<T>::value(const string key) const{
 	}
 
 	return *iter->value;
+}
+
+
+template<class T>
+void Trie<T>::erase(const string key){
+	Node* iter = _root;
+	
+	for(int i = 0; i < key.length() ; i++)
+		iter = iter->chars[(int)key[i]];
+
+
+	if(iter->countNotNull == 0){
+
+		for (int i = key.length()-1; i >= 0 ; i--){
+			iter = iter->parent;
+
+			if(iter->countNotNull > 1 || i == 0){
+				int characterPos = (int)key[i];
+
+				Node* buffer = iter->chars[characterPos];
+				iter->chars[characterPos] = NULL;
+				delete buffer;
+				break;
+			}
+		}
+
+	}else{
+		delete iter->value;
+		iter->value = NULL;
+	}
+
+
+	for (typename list<string>::iterator it1 = _keys.begin(); it1 != _keys.end(); it1++)
+		if(*it1 == key){
+			_keys.erase(it1);
+			break;
+		}
+
 }
 
 
