@@ -10,6 +10,42 @@ using namespace std;
 
 template<class T>
 class Trie {
+	
+	private:
+		struct Node {
+			T* value;
+			vector<Node*> chars;
+			Node* parent;
+			int countNotNull;
+			int parentPosition;
+
+			Node(){
+				this->value = NULL;
+				this->parent = NULL;
+				this->chars = vector<Node*>(256,NULL);
+				this->countNotNull = 0;
+				this->parentPosition = -1;
+			}
+
+			~Node(){
+				if(value != NULL){
+					delete value;
+					value = NULL;
+				}
+
+				for(int i = 256; i>0; i--)
+					if(chars[i-1] != NULL){
+						delete chars[i-1];
+						chars[i-1] = NULL;
+					}
+			
+			}
+
+		};
+
+		Node* _root;
+		vector<Node*> _keysRef;
+
 
 	public:
 	  	class Iterator;
@@ -32,51 +68,16 @@ class Trie {
 				string next() const;
 			
 			private:
-				list<string>::const_iterator _keysIterator;
-				list<string>::const_iterator _lastKeyIterate;
+				int _current;
+				vector<Node*> _ptrToKeys;
 		
 		};
-
-
-	private:
-		struct Node {
-			T* value;
-			vector<Node*> chars;
-			Node* parent;
-			int countNotNull;
-
-			Node(){
-				this->value = NULL;
-				this->parent = NULL;
-				this->chars = vector<Node*>(256,NULL);
-				this->countNotNull = 0;
-			}
-
-			~Node(){
-				if(value != NULL){
-					delete value;
-					value = NULL;
-				}
-
-				for(int i = 256; i>0; i--)
-					if(chars[i-1] != NULL){
-						delete chars[i-1];
-						chars[i-1] = NULL;
-					}
-			
-			}
-
-		};
-
-		Node* _root;
-		list<string> _keys;
 
 };
 
 
 template<class T>
 Trie<T>::Trie(){
-	_keys = list<string>();
 	_root = new Node();
 }
 
@@ -97,6 +98,7 @@ void Trie<T>::define(const string key, const T& value){
 		if(iter->chars[characterPos] == NULL){
 			Node* newNode = new Node();
 			newNode->parent = iter;
+			newNode->parentPosition = characterPos;
 
 			iter->chars[characterPos] = newNode;
 			iter->countNotNull++;
@@ -106,7 +108,7 @@ void Trie<T>::define(const string key, const T& value){
 	}
 
 	if(iter->value == NULL)
-		_keys.push_back(key);
+		_keysRef.push_back(iter);
 	else
 		delete iter->value;
 	
@@ -135,10 +137,8 @@ template<class T>
 T& Trie<T>::value(const string key) const{
 	Node* iter = _root;
 	
-	for(int i = 0; i < key.length() ; i++){
-		int characterPos = (int)key[i];
-		iter = iter->chars[characterPos];
-	}
+	for(int i = 0; i < key.length() ; i++)
+		iter = iter->chars[(int)key[i]];
 
 	return *iter->value;
 }
@@ -150,6 +150,13 @@ void Trie<T>::erase(const string key){
 	
 	for(int i = 0; i < key.length() ; i++)
 		iter = iter->chars[(int)key[i]];
+
+	for (int i = 0; i < _keysRef.size(); i++)
+		if(_keysRef[i] == iter){
+			_keysRef[i] = NULL;
+			_keysRef.erase(_keysRef.begin() + i);
+			break;
+		}
 
 
 	if(iter->countNotNull == 0){
@@ -172,19 +179,12 @@ void Trie<T>::erase(const string key){
 		iter->value = NULL;
 	}
 
-
-	for (typename list<string>::iterator it1 = _keys.begin(); it1 != _keys.end(); it1++)
-		if(*it1 == key){
-			_keys.erase(it1);
-			break;
-		}
-
 }
 
 
 template<class T>
 int Trie<T>::keysCount() const{
-	return _keys.size();
+	return _keysRef.size();
 }
 
 
@@ -201,23 +201,41 @@ const typename Trie<T>::Iterator Trie<T>::keys() const{
 
 template<class T>
 Trie<T>::Iterator::Iterator(const Trie<T>& trie){
-	_keysIterator = trie._keys.begin();
-	_lastKeyIterate = trie._keys.end();
+	_current = 0;
+	_ptrToKeys = trie._keysRef;
 }
 
 template<class T>
 void Trie<T>::Iterator::advance(){
-	_keysIterator++;
+	_current++;
 }
 
 template<class T>
 string Trie<T>::Iterator::next() const{
-	return *_keysIterator;
+	Node* temp = _ptrToKeys[_current];
+	list<char> chars;
+
+	while(temp->parentPosition != -1){
+		chars.push_back((char)temp->parentPosition);
+		temp = temp->parent;
+	}
+	
+	int strSize = chars.size();
+	
+	int i = strSize-1;
+	char ret[strSize+1];
+	for (list<char>::iterator it=chars.begin(); it!=chars.end() ; ++it){
+    	ret[i] = *it;
+    	i--;
+    }
+    
+    ret[strSize] = '\0';
+	return ret;
 }
 
 template<class T>
 bool Trie<T>::Iterator::thereIsMore() const{
-	return _keysIterator != _lastKeyIterate;
+	return _current < _ptrToKeys.size();
 }
 
 

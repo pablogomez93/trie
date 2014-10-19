@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <iostream>
 #include <list>
 #include "trie.h"
 
@@ -77,8 +78,6 @@ void keysIterator_test(){
 	list<string>::const_iterator copyListIt = copys.begin();
 
 	typename Trie<int>::Iterator it = trie3.keys();
-	assert(it.thereIsMore());
-
 	while(it.thereIsMore()){
 		assert(it.next() == *copyListIt);
 		copyListIt++;
