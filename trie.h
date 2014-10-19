@@ -196,7 +196,7 @@ const typename Trie<T>::Iterator Trie<T>::keys() const{
 
 
 /*
- * Keys iterator impl. Is a traslator of the list class iterator.
+ * Keys iterator implementation.
  */
 
 template<class T>
