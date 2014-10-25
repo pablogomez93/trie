@@ -55,8 +55,8 @@ class Trie {
 		void define(const string, const T&);
 		bool defined(const string) const;
 		T& value(const string) const;
-		void erase(const string);
 		int keysCount() const;
+		void erase(const string);
 		const Iterator keys() const;
 
 		class Iterator{
@@ -145,6 +145,12 @@ T& Trie<T>::value(const string key) const{
 
 
 template<class T>
+int Trie<T>::keysCount() const{
+	return _keysRef.size();
+}
+
+
+template<class T>
 void Trie<T>::erase(const string key){
 	Node* iter = _root;
 	
@@ -179,12 +185,6 @@ void Trie<T>::erase(const string key){
 		iter->value = NULL;
 	}
 
-}
-
-
-template<class T>
-int Trie<T>::keysCount() const{
-	return _keysRef.size();
 }
 
 
