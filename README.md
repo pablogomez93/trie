@@ -6,9 +6,11 @@ A implementation of a trie map with basic and common methods, in C++
 Below are listed the complexity for each class method
 
 Constructor
+
 	- Trie();	Constant, O(1).
 
 Methods
+
 	- define(const str, const T&) 	Linear in length of str passed by parameter, O(str.length).
 	
 	- defined(const str)			Linear in length of str passed by parameter plus copy time of type T, O(str.length + copy(T)).
