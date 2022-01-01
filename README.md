@@ -1,7 +1,7 @@
 trie
 ====
 
-A implementation of a trie map with basic and common methods, in C++
+An implementation of a trie map with basic and common methods, in C++
 
 Below are listed the complexity for each class method
 
